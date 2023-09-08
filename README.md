@@ -8,7 +8,7 @@ llama.cpp link： https://github.com/ggerganov/llama.cpp
 
 Official Website: [termux](https://termux.dev/cn/index.html).
 
-Change repo for faster speed:
+Change repo for faster speed (optional):
 
 ```bash
 termux-change-repo

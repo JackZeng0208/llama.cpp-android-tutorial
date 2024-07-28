@@ -1,6 +1,7 @@
 # llama.cpp Android Tutorial
 
 [中文](README_CN.md)
+
 **Note: Current tutorial might be outdated, I will write a new version later**
 
 llama.cpp link： https://github.com/ggerganov/llama.cpp

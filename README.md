@@ -35,7 +35,7 @@ Check [here](https://wiki.termux.com/wiki/Package_Management) for more help.
 In Termux, run:
 
 ```bash
-pkg install python cmake make ninja
+pkg install python cmake make ninja git
 ```
 
 ## Install NDK

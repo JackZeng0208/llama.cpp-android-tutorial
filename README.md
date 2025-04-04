@@ -35,7 +35,7 @@ Check [here](https://wiki.termux.com/wiki/Package_Management) for more help.
 In Termux, run:
 
 ```bash
-pkg install python cmake make ninja git wget
+pkg install python cmake make ninja git wget vim
 ```
 
 ## Install NDK
@@ -58,10 +58,10 @@ After that, check whether your OpenJDK is available or not:
 ls /data/data/com.termux/files/usr/lib/jvm/ # Default Path
 ```
 
-If not, download OpenJDK (for here I download OpenJDK-17):
+If not, download OpenJDK (for here I download OpenJDK-21):
 
 ```bash
-pkg install openjdk-17
+pkg install openjdk-21
 ```
 
 Then, add `JAVA_HOME` environment variable
@@ -71,7 +71,7 @@ vim ~/.bashrc
 ```
 
 ```bash
-export JAVA_HOME=/data/data/com.termux/files/usr/lib/jvm/java-17-openjdk # Or your own jdk path
+export JAVA_HOME=/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk # Or your own jdk path
 ```
 
 Apply the changes:

@@ -102,7 +102,9 @@ cd ~/dev/llm
  
 git clone https://github.com/KhronosGroup/OpenCL-Headers && \ 
 cd OpenCL-Headers && \ 
-cp -r CL ~/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include 
+mkdir build && \
+cp -r CL ~/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include && \
+cd ..
 ```
 
 Install the headers using CMake:
@@ -118,14 +120,11 @@ cmake --build OpenCL-Headers/build --target install
 Install OpenCL ICD Loader:
 
 ```bash
-cd ~/dev/llm 
-```
-
-```bash
 git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader && \ 
 cd OpenCL-ICD-Loader && \ 
 mkdir build_ndk26 && cd build_ndk26 && \ 
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release \ 
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_PREFIX_PATH=$HOME/dev/llm/OpenCL-Headers/install \
   -DCMAKE_TOOLCHAIN_FILE=$HOME/android-sdk/ndk/26.3.11579264/build/cmake/android.toolchain.cmake \ 
   -DOPENCL_ICD_LOADER_HEADERS_DIR=$HOME/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include \ 
   -DANDROID_ABI=arm64-v8a \ 

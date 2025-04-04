@@ -1,6 +1,6 @@
 # llama.cpp Android Tutorial (GPU)
 
-🎉 **2025 version of tutorial is available! (April 4, 2025) **
+🎉 **2025 version of tutorial is available! (April 4, 2025)**
 
 ## Hardware Prerequisites
 

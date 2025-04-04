@@ -1,14 +1,26 @@
-# llama.cpp Android Tutorial
+# llama.cpp Android Tutorial (GPU)
 
-[中文](README_CN.md)
+🎉 **2025 version of tutorial is available! (April 4, 2025) **
 
-**Note: Current tutorial might be outdated, I will write a new version later**
+## Hardware Prerequisites
 
-llama.cpp link： https://github.com/ggerganov/llama.cpp
+- Android phone powered by **Qualcomm SoCs: Snapdragon 8 Gen 1, 2, 3 and 8 Elite**
+- Recommend by not require: memory > 12 GB
 
-## Termux installation
+## Reference Links
 
-Official Website: [termux](https://termux.dev/cn/index.html).
+- [Qualcomm Official Tutorial](https://www.qualcomm.com/developer/blog/2024/11/introducing-new-opn-cl-gpu-backend-llama-cpp-for-qualcomm-adreno-gpu)
+
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)
+
+## Software Prerequisites
+
+### Termux (on Android phone)
+
+Download Termux through F-Droid:
+
+- [Termux official website](https://termux.dev/en/index.html)
+- [F-Droid](https://f-droid.org/en/)
 
 Change repo for faster speed (optional):
 
@@ -18,150 +30,128 @@ termux-change-repo
 
 Check [here](https://wiki.termux.com/wiki/Package_Management) for more help.
 
-## Install necessary code and packages
+### Softwares in Termux
 
-Download following packages in termux:
-
-```bash
-pkg install clang wget git cmake
-```
-
-Obtain llama.cpp source code:
+In Termux, run:
 
 ```bash
-git clone https://github.com/ggerganov/llama.cpp.git
+pkg install python cmake make ninja
 ```
 
+## Install NDK
 
-## Importing language model
-
-Type`termux-setup-storage` in termux terminal before importing model. Grant access for termux so that user could access files outside of termux. For details, please visit: https://wiki.termux.com/wiki/Termux-setup-storage
-
-Use `adb push` command to import:
-
-```
-adb push \path\to\your\model\on\windows /storage/emulated/0/download
-```
-
-`~/storage/downloads` in termux home directory shares download files on Android system. Move it to `~/llama.cpp/models` 
+Run these commands first:
 
 ```bash
-mv ~/storage/downloads/model_name ~/llama.cpp/models
+cd ~ 
+wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip && \ 
+unzip commandlinetools-linux-8512546_latest.zip && \ 
+mkdir -p ~/android-sdk/cmdline-tools && \ 
+mv cmdline-tools latest && \ 
+mv latest ~/android-sdk/cmdline-tools/ && \ 
+rm -rf commandlinetools-linux-8512546_latest.zip 
 ```
 
-## Compile and build
-
-**Strongly recommend to use cmake rather than make**
-
-### Based on Android NDK（Non-OpenCL）
-
-#### Install Pre-build NDK
-
-Location: https://github.com/lzhiyong/termux-ndk/releases/tag/ndk-r23/
+After that, check whether your OpenJDK is available or not:
 
 ```bash
-wget https://github.com/lzhiyong/termux-ndk/releases/download/ndk-r23/android-ndk-r23c-aarch64.zip
+ls /data/data/com.termux/files/usr/lib/jvm/ # Default Path
 ```
 
-Unzip and set NDK PATH:
+If not, download OpenJDK (for here I download OpenJDK-17):
 
 ```bash
-unzip YOUR_ANDROID_NDK_ZIP_FILE
-export NDK=~/path/to/your/unzip/directory
+pkg install openjdk-17
 ```
 
-#### Build
-
-Build under `~/llama.cpp/build`:
+Then, add `JAVA_HOME` environment variable
 
 ```bash
-mkdir build
-cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-23 -DCMAKE_C_FLAGS=-march=armv8.4a+dotprod ..
-make
+vim ~/.bashrc
 ```
-
-Run:
 
 ```bash
-cd bin/
-./main YOUR_PARAMETERS
+export JAVA_HOME=/data/data/com.termux/files/usr/lib/jvm/java-17-openjdk # Or your own jdk path
 ```
 
-### Based on OpenCL + CLBlast（Recommend）
-
-Download necessary packages: 
+Apply the changes:
 
 ```bash
-apt install ocl-icd opencl-headers opencl-clhpp clinfo libopenblas
+source ~/.bashrc
 ```
 
-Manually compile CLBlast and copy `clblast.h` into llama.cpp:
+Verify that `JAVA_HOME` is set correctly 
 
 ```bash
-git clone https://github.com/CNugteren/CLBlast.git
-cd CLBlast
-cmake .
-make
-cp libclblast.so* $PREFIX/lib
-cp ./include/clblast.h ../llama.cpp
+echo $JAVA_HOME
 ```
 
-Copy OpenBLAS files to llama.cpp:
+Finally, run this:
 
 ```bash
-cp /data/data/com.termux/files/usr/include/openblas/cblas.h .
-cp /data/data/com.termux/files/usr/include/openblas/openblas_config.h .
+yes | ~/android-sdk/cmdline-tools/latest/bin/sdkmanager "ndk;26.3.11579264" 
 ```
 
-#### Build
+## Install OpenCL Headers and ICD loaders
+
+Clone OpenCL Headers:
 
 ```bash
-cd ~/llama.cpp
-mkdir build
-cd build
-cmake .. -DLLAMA_CLBLAST=ON
-cmake --build . --config Release
+mkdir -p ~/dev/llm 
+cd ~/dev/llm 
+ 
+git clone https://github.com/KhronosGroup/OpenCL-Headers && \ 
+cd OpenCL-Headers && \ 
+cp -r CL ~/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include 
 ```
 
-Add `LD_LIBRARY_PATH` under `~/.bashrc`（Run program directly on physical GPU）：
+Install the headers using CMake:
 
 ```bash
-echo "export LD_LIBRARY_PATH=/vendor/lib64:$LD_LIBRARY_PATH" >> ~/.bashrc
+cmake -S OpenCL-Headers -B OpenCL-Headers/build -D CMAKE_INSTALL_PREFIX=OpenCL-Headers/install
 ```
-
-Check GPU is available for OpenCL:
 
 ```bash
-clinfo -l
+cmake --build OpenCL-Headers/build --target install
 ```
 
-If everything works fine, for Qualcomm Snapdragon SoC, it will display:
+Install OpenCL ICD Loader:
 
 ```bash
-Platform #0: QUALCOMM Snapdragon(TM)
- `-- Device #0: QUALCOMM Adreno(TM)
+cd ~/dev/llm 
 ```
-
-Run:
 
 ```bash
-cd bin/
-./main YOUR_PARAMETERS
+git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader && \ 
+cd OpenCL-ICD-Loader && \ 
+mkdir build_ndk26 && cd build_ndk26 && \ 
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release \ 
+  -DCMAKE_TOOLCHAIN_FILE=$HOME/android-sdk/ndk/26.3.11579264/build/cmake/android.toolchain.cmake \ 
+  -DOPENCL_ICD_LOADER_HEADERS_DIR=$HOME/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include \ 
+  -DANDROID_ABI=arm64-v8a \ 
+  -DANDROID_PLATFORM=24 \ 
+  -DANDROID_STL=c++_shared && \ 
+ninja && \ 
+cp libOpenCL.so ~/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android 
 ```
 
-#### Results
+## Build llama.cpp with OpenCL backend
 
-- SoC: Qualcomm Snapdragon 8 Gen 2
-- RAM: 16 GB
-- Model: llama-2-7B-Chat-Q4_0.gguf（[Download](https://huggingface.co/Rabinovich/Llama-2-7B-Chat-GGUF)）
-- Multiple long conversations
-- Params:
-  - Context size = 4096
-  - Batch size = 16
-  - Threads = 4
+```bash
+cd ~/dev/llm 
+ 
+git clone https://github.com/ggerganov/llama.cpp && \ 
+cd llama.cpp && \ 
+mkdir build-android && cd build-android 
+ 
+cmake .. -G Ninja \ 
+  -DCMAKE_TOOLCHAIN_FILE=$HOME/android-sdk/ndk/26.3.11579264/build/cmake/android.toolchain.cmake \ 
+  -DANDROID_ABI=arm64-v8a \ 
+  -DANDROID_PLATFORM=android-28 \ 
+  -DBUILD_SHARED_LIBS=OFF \ 
+  -DGGML_OPENCL=ON 
+ 
+ninja 
+```
 
-Result:
-
-- Load time = 1129.17 ms
-- 3.67 tokens per second
+The executable files (such as `llama-cli` will be available in `build-android/bin`)

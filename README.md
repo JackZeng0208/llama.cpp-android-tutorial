@@ -1,4 +1,4 @@
-# llama.cpp Android Tutorial
+# llama.cpp Android Tutorial (Adreno OpenCL Backend)
 
 ## Note Updates
 

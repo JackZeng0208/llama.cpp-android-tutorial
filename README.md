@@ -1,7 +1,5 @@
 # llama.cpp Android Tutorial
 
-[toc]
-
 ## Note Updates
 
 - 09/08/2023: First version of llama.cpp android tutorial is available

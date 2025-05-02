@@ -148,7 +148,7 @@ Copy both `libOpenCL.so` and `libOpenCL_adreno.so` into your termux app
 
 ```bash
 # The destination can be any other directory in your termux
-cp /vendor/lib64/{libOpenCL.so, libOpenCL_andreno.so} ~/
+cp /vendor/lib64/{libOpenCL.so, libOpenCL_adreno.so} ~/
 ```
 
 Add the directory path containing these two libraries to the `LD_LIBRARY_PATH` environment variable
